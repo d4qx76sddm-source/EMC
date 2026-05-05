@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>EMC - Exception Management Company</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4ffff;
+  color:#222;
+  transition:0.3s;
+}
+
+#bgLogo{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  opacity:0.05;
+  width:60%;
+  z-index:-1;
+}
+
+nav{
+  background:#d9f3f3;
+  padding:15px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+button{
+  padding:10px;
+  border:none;
+  background:#bfecec;
+  cursor:pointer;
+}
+
+#app{
+  padding:20px;
+  animation:fade 0.3s;
+}
+
+@keyframes fade{
+  from{opacity:0;transform:translateY(10px);}
+  to{opacity:1;}
+}
+
+input, textarea, select{
+  width:100%;
+  margin:5px 0;
+  padding:8px;
+}
+
+.card{
+  border-bottom:1px solid #ccc;
+  padding:10px;
+  cursor:pointer;
+}
+
+img.top{
+  max-width:100%;
+  display:block;
+  margin:auto;
+}
+</style>
+</head>
+
+<body>
+
+<img id="bgLogo" src="logo.png">
+
+<nav>
+<button onclick="home()">主页</button>
+<button onclick="list()">异常档案</button>
+</nav>
+
+<div id="app"></div>
+
+<script>
+let data=JSON.parse(localStorage.getItem("emc")||"{}");
+
+function save(){
+  localStorage.setItem("emc",JSON.stringify(data));
+}
+
+function home(){
+document.getElementById("app").innerHTML=`
+<h1>EMC</h1>
+<p>
+“古老的传说并非偶然，超自然的力量裹挟着人类。我们并非特殊的存在，我们只是相对稳定；或许我们打搅了所谓的平衡，亦或许这世上从未有过平衡。以凡人之躯抵抗神明，以骨肉之身抵御黑暗，不畏惧生死，只为全人类的希望。”
+</p>
+`;
+}
+
+function list(){
+let html='<input placeholder="搜索" oninput="search(this.value)">';
+for(let i=1;i<=1000;i++){
+let id="EMC-"+String(i).padStart(3,"0");
+let name=data[id]?.name||"未命名";
+html+=`<div class="card" onclick="view('${id}')">${id} - ${name}</div>`;
+}
+document.getElementById("app").innerHTML=html;
+}
+
+function search(q){
+let cards=document.querySelectorAll(".card");
+cards.forEach(c=>{
+c.style.display=c.innerText.includes(q)?"block":"none";
+});
+}
+
+function view(id){
+let a=data[id]||{};
+document.getElementById("app").innerHTML=`
+
+${a.img?`<img class="top" src="${a.img}">`:""}
+
+<h2>${id} - ${a.name||"未命名"}</h2>
+
+等级：${a.level||"C1"}
+
+<p>${a.desc||""}</p>
+
+评分：${a.rate||0}/5
+<button onclick="rate('${id}',1)">+1</button>
+
+<br><br>
+
+<button onclick="edit('${id}')">编辑</button>
+<button onclick="del('${id}')">删除</button>
+<button onclick="list()">返回</button>
+`;
+}
+
+function edit(id){
+let a=data[id]||{};
+document.getElementById("app").innerHTML=`
+<h2>${id}</h2>
+
+名称<input id="name" value="${a.name||""}">
+
+图片URL<input id="img" value="${a.img||""}">
+
+等级<select id="level">
+<option>C1</option><option>C2</option>
+<option>B1</option><option>B2</option>
+<option>A1</option><option>A2</option>
+<option>S</option><option>R</option>
+<option>无法分级</option>
+</select>
+
+内容<textarea id="desc">${a.desc||""}</textarea>
+
+<button onclick="saveData('${id}')">保存</button>
+<button onclick="view('${id}')">返回</button>
+`;
+level.value=a.level||"C1";
+}
+
+function saveData(id){
+data[id]={
+name:name.value,
+img:img.value,
+level:level.value,
+desc:desc.value,
+rate:data[id]?.rate||0
+};
+save();
+view(id);
+}
+
+function del(id){
+delete data[id];
+save();
+list();
+}
+
+function rate(id,v){
+if(!data[id]) data[id]={};
+data[id].rate=(data[id].rate||0)+v;
+save();
+view(id);
+}
+
+home();
+</script>
+
+</body>
+</html>
